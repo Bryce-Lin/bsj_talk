@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const { name, avatar } = await request.json();
 
-    const newContestant = await prisma.contestant.create({
+    const newContestant = await prisma.contestants.create({
       data: {
         name,
         avatar,
