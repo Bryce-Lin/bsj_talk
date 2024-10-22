@@ -4,9 +4,7 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "prisma": {
-          "generate": "prisma generate"
-        }
+        "installCommand": "pnpm install"
       }
     }
   ]
