@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model contestants {
+  id     Int    @id @default(autoincrement())
+  name   String @db.VarChar(255)
+  avatar String @db.VarChar(255)  // 确保这里的长度足够存储URL
+  votes  Int?   @default(0)
+}
