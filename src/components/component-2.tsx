@@ -160,7 +160,7 @@ export function Component2() {
                   <TableCell>{contestant.name}</TableCell>
                   <TableCell>{contestant.votes}</TableCell>
                   <TableCell>
-                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://your-domain.com/vote/${contestant.id}`)}`} alt="QR Code" className="size-20" />
+                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://bsj-talk-lxqf.vercel.app/?id=${contestant.id}`)}`} alt="QR Code" className="size-20" />
                   </TableCell>
                 </TableRow>
               ))}
