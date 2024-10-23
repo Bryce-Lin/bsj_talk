@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-      "vercel-build": "prisma generate && next build",
+    "vercel-build": "prisma generate && next build",
     "prisma:generate": "prisma generate",
     "dev": "next dev",
     "build": "next build",
@@ -29,6 +29,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
+    "ali-oss": "^6.21.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
     "eslint-plugin-tailwindcss": "^3.17.0",

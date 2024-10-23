@@ -10,6 +10,6 @@ datasource db {
 model contestants {
   id     Int    @id @default(autoincrement())
   name   String @db.VarChar(255)
-  avatar String @db.VarChar(255)  // 确保这里的长度足够存储URL
+  avatar String @db.VarChar(1000) // 增加长度以存储完整 URL
   votes  Int?   @default(0)
 }

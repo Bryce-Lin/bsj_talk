@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PlusCircle, Upload } from "lucide-react"
+import { PlusCircle, Upload, Loader2 } from "lucide-react"
 
 interface Contestant {
   id: number
@@ -18,81 +18,80 @@ export function Component2() {
   const [contestants, setContestants] = useState<Contestant[]>([])
   const [newName, setNewName] = useState('')
   const [newAvatar, setNewAvatar] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
 
-  const uploadImage = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('上传图片失败');
-      }
-
-      const data = await response.json();
-      return data.filepath;
-    } catch (error) {
-      console.error('上传图片时出错:', error);
-      throw error;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setIsUploading(true)
+      setNewAvatar(file)
+      setIsUploading(false)
     }
-  };
+  }
 
   const addContestant = async () => {
     if (newName && newAvatar) {
+      setIsAdding(true)
       try {
-        // 首先上传图片
-        const avatarUrl = await uploadImage(newAvatar);
+        const formData = new FormData()
+        formData.append('file', newAvatar)
 
-        // 然后添加选手
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error('文件上传失败')
+        }
+
+        const { filepath } = await uploadResponse.json()
+
         const response = await fetch('/api/contestants', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name: newName, avatar: avatarUrl }),
-        });
+          body: JSON.stringify({ name: newName, avatar: filepath }),
+        })
 
         if (!response.ok) {
-          throw new Error('添加选手失败');
+          throw new Error('添加选手失败')
         }
 
-        const newContestant = await response.json();
-        setContestants([...contestants, newContestant]);
-        setNewName('');
-        setNewAvatar(null);
-        // 重新获取选手列表以确保数据同步
-        fetchContestants();
+        const newContestant = await response.json()
+        setContestants([...contestants, newContestant])
+        setNewName('')
+        setNewAvatar(null)
+        fetchContestants()
       } catch (error) {
-        console.error('添加选手时出错:', error);
+        console.error('添加选手时出错:', error)
         // 这里可以添加错误处理，比如显示一个错误消息给用户
+      } finally {
+        setIsAdding(false)
       }
     }
-  };
+  }
 
-  // 添加这个函数来获取选手列表
   const fetchContestants = async () => {
     try {
-      const response = await fetch('/api/contestants');  // 使用新的 API 路径
+      const response = await fetch('/api/contestants')
       if (response.ok) {
-        const data = await response.json();
-        setContestants(data);
+        const data = await response.json()
+        setContestants(data)
       } else {
-        throw new Error('获取选手列表失败');
+        throw new Error('获取选手列表失败')
       }
     } catch (error) {
-      console.error('获取选手列表失败:', error);
+      console.error('获取选手列表失败:', error)
       // 这里可以添加错误处理，比如显示一个错误消息给用户
     }
-  };
+  }
 
-  // 在组件加载时获取选手列表
   useEffect(() => {
-    fetchContestants();
-  }, []);
+    fetchContestants()
+  }, [])
 
   return (
     <div className="container mx-auto p-4">
@@ -108,28 +107,39 @@ export function Component2() {
               placeholder="选手名称"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
+              disabled={isAdding}
             />
             <div className="relative">
               <Input
                 type="file"
                 className="hidden"
                 id="avatar-upload"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) {
-                    setNewAvatar(file)  // 直接设置文件对象，而不是 base64 字符串
-                  }
-                }}
+                onChange={handleFileUpload}
+                disabled={isUploading || isAdding}
               />
               <Button
                 variant="outline"
                 onClick={() => document.getElementById('avatar-upload')?.click()}
+                disabled={isUploading || isAdding}
               >
-                <Upload className="mr-2 size-4" /> 上传头像
+                {isUploading ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 size-4" />
+                )}
+                {isUploading ? '上传中...' : '上传头像'}
               </Button>
             </div>
-            <Button onClick={addContestant}>
-              <PlusCircle className="mr-2 size-4" /> 添加选手
+            <Button 
+              onClick={addContestant} 
+              disabled={isAdding || !newName || !newAvatar}
+            >
+              {isAdding ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <PlusCircle className="mr-2 size-4" />
+              )}
+              {isAdding ? '添加中...' : '添加选手'}
             </Button>
           </div>
         </CardContent>
